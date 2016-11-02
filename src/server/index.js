@@ -5,27 +5,11 @@ import express from 'express';
 import MongoClient from 'mongodb';
 import path from 'path';
 import omit from 'lodash.omit';
-import webpack from 'webpack';
-import webpackMiddleware from 'webpack-dev-middleware';
-import webpackHotMiddleware from 'webpack-hot-middleware';
-import config from '../../webpack.config.js';
+
+import applyMiddleware from './middleware';
 
 const port = 3000;
 const app = express();
-
-const compiler = webpack(config);
-const middleware = webpackMiddleware(compiler, {
-  publicPath: config.output.publicPath,
-  contentBase: 'src',
-  stats: {
-    colors: true,
-    hash: false,
-    timings: true,
-    chunks: false,
-    chunkModules: false,
-    modules: false
-  }
-});
 
 const jsonParser = bodyParser.json();
 
@@ -34,21 +18,16 @@ MongoClient.connect('mongodb://0.0.0.0:27017/todos', (mongoErr, db) => {
     return console.log(mongoErr);
   }
 
-  app.use(middleware);
-  app.use(webpackHotMiddleware(compiler));
-
   const collection = db.collection('todos');
 
+  applyMiddleware(app);
+
   function fetchAllTodos(res) {
-    collection.find().toArray((err, results) => {
+    collection.find({}).toArray((err, results) => {
       if (err) res.sendStatus(500).send(err);
       res.send(results);
     });
   }
-
-  app.get('/api/todos', (req, res) => {
-    return fetchAllTodos(res);
-  });
 
   app.post('/api/todos', jsonParser, (req, res) => {
     const todo = req.body;
@@ -58,6 +37,10 @@ MongoClient.connect('mongodb://0.0.0.0:27017/todos', (mongoErr, db) => {
       inserted.id = inserted._id;
       res.send(inserted);
     });
+  });
+
+  app.get('/api/todos', (req, res) => {
+    return fetchAllTodos(res);
   });
 
   app.put('/api/todos/:id', jsonParser, (req, res) => {

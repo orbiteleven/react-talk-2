@@ -5,10 +5,40 @@ import {v4} from 'uuid';
 
 const actionCreators = actionCreatorsFor('todos', {store: 'immutable'});
 
+export const addTodo = text => {
+  return dispatch => {
+    // This is for optimistic updates. In a production system the DB would assign an ID
+    const id = v4();
+
+    // And a fake Todo for optimistic updates
+    const newTodo = {
+      completed: false,
+      text,
+      id
+    };
+
+    // This is so we can dispatch actions directly instead of:
+    // dispatch(actionCreators.createStart(newTodo));
+    const {
+      createStart,
+      createSuccess,
+      createError
+    } = bindActionCreators(actionCreators, dispatch);
+
+    createStart(newTodo);
+
+    request.post('/api/todos', newTodo, (error, {body}) => {
+      if (error) {
+        return createError(error, newTodo);
+      }
+
+      return createSuccess(body, id);
+    });
+  };
+};
+
 export const fetchTodos = () => {
   return dispatch => {
-    // This is so we can dispatch actions directly instead of:
-    // dispatch(actionCreators.fetchStart());
     const {
       fetchStart,
       fetchSuccess,
@@ -26,36 +56,6 @@ export const fetchTodos = () => {
       }
 
       return fetchSuccess(body);
-    });
-  };
-};
-
-export const addTodo = text => {
-  return dispatch => {
-    // This is for optimistic updates. In a production system the DB would assign an ID
-    const id = v4();
-
-    // And a fake Todo for optimistic updates
-    const newTodo = {
-      completed: false,
-      text,
-      id
-    };
-
-    const {
-      createStart,
-      createSuccess,
-      createError
-    } = bindActionCreators(actionCreators, dispatch);
-
-    createStart(newTodo);
-
-    request.post('/api/todos', newTodo, (error, {body}) => {
-      if (error) {
-        return createError(error, newTodo);
-      }
-
-      return createSuccess(body, id);
     });
   };
 };
