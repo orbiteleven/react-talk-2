@@ -1,23 +1,23 @@
 {
-  "name": "webpack-express-boilerplate",
+  "name": "react-talk-2",
   "version": "0.1.0",
-  "description": "A boilerplate for running a Webpack workflow in Node express",
+  "description": "",
   "main": "server.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/christianalfoni/webpack-express-boilerplate.git"
-  },
   "keywords": [
     "express",
     "webpack",
-    "node"
+    "node",
+    "react",
+    "redux"
   ],
-  "author": "Christian Alfoni",
+  "author": "Damon Toal-Rossi",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/christianalfoni/webpack-express-boilerplate/issues"
+  "babel": {
+    "presets": [
+      "es2015",
+      "react"
+    ]
   },
-  "homepage": "https://github.com/christianalfoni/webpack-express-boilerplate",
   "scripts": {
     "test": "",
     "start": "nodemon server",
